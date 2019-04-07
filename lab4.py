@@ -65,7 +65,8 @@ N = 35000
 T = 8760
 AMOUNT_OF_DEVICES = [4, 2, 3, 4]
 P = 0.995
-P_START = P + 0.0001
+P_START = P + 0.001
+FIND_STEPS = 2
 
 
 def main():
@@ -75,7 +76,7 @@ def main():
                 for i4 in range(1, 5):
                     p = run_simulation(N, M, LAMBDAS, AMOUNT_OF_DEVICES, [i1, i2, i3, i4], T, lsfr)
                     if p >= P:
-                        print(P, (i1, i2, i3, i4))
+                        print(p, (i1, i2, i3, i4))
 
 
 def fast_search():
@@ -89,6 +90,13 @@ def fast_search():
                                lambda broken, work_time: lsfr_part(i, broken, work_time))
         reserve.append(res)
     print(reserve, run_simulation(N, M, LAMBDAS, AMOUNT_OF_DEVICES, reserve, T, lsfr))
+    for i1 in range(reserve[0], reserve[0] + FIND_STEPS + 1):
+        for i2 in range(reserve[1], reserve[1] + FIND_STEPS + 1):
+            for i3 in range(reserve[2], reserve[2] + FIND_STEPS + 1):
+                for i4 in range(reserve[3], reserve[3] + FIND_STEPS + 1):
+                    p = run_simulation(N, M, LAMBDAS, AMOUNT_OF_DEVICES, [i1, i2, i3, i4], T, lsfr)
+                    if p >= P:
+                        print(p, (i1, i2, i3, i4))
 
 
 if __name__ == '__main__':
