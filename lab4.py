@@ -90,10 +90,10 @@ def fast_search():
                                lambda broken, work_time: lsfr_part(i, broken, work_time))
         reserve.append(res)
     print(reserve, run_simulation(N, M, LAMBDAS, AMOUNT_OF_DEVICES, reserve, T, lsfr))
-    for i1 in range(reserve[0], reserve[0] + FIND_STEPS + 1):
-        for i2 in range(reserve[1], reserve[1] + FIND_STEPS + 1):
-            for i3 in range(reserve[2], reserve[2] + FIND_STEPS + 1):
-                for i4 in range(reserve[3], reserve[3] + FIND_STEPS + 1):
+    for i1 in range(reserve[0], reserve[0] + FIND_STEPS):
+        for i2 in range(reserve[1], reserve[1] + FIND_STEPS):
+            for i3 in range(reserve[2], reserve[2] + FIND_STEPS):
+                for i4 in range(reserve[3], reserve[3] + FIND_STEPS):
                     p = run_simulation(N, M, LAMBDAS, AMOUNT_OF_DEVICES, [i1, i2, i3, i4], T, lsfr)
                     if p >= P:
                         print(p, (i1, i2, i3, i4))
