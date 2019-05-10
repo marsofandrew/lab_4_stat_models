@@ -2,19 +2,18 @@
 import random
 import math
 
-LAMBDA = 'lambda'
-TYPE = 'type'
+M = 3                                        # amount of types of devices
+LAMBDAS = [40 * 1e-6, 10 * 1e-6, 80 * 1e-6]  # lambdas of types
+N = 35000                                    # special parameter, see task
+T = 8760                                     # work time
+P = 0.99                                     # see task
+P_START = P                                  # probability to stop coordinate descent
+FIND_STEPS = 2                               #
+AMOUNT_OF_DEVICES = [3, 2, 3]                # amount of devices for each type
 
 
 def get_random_time(lamb):
     return -math.log(random.random(), math.e) / lamb
-
-
-def get_random_times(devices: list):
-    times = []
-    for dev in devices:
-        times.append(get_random_time(dev[LAMBDA]))
-    return times
 
 
 def lsfr_part(part_index, broken_times: list, work_time):
@@ -22,20 +21,17 @@ def lsfr_part(part_index, broken_times: list, work_time):
     for i in range(len(broken_times)):
         elements.append(broken_times[i] > work_time)
     if part_index == 0:
-        return (elements[0] and elements[1]) or (elements[2] and elements[3])
+        return (elements[0] and elements[1]) or (elements[2])
     if part_index == 1:
         return elements[0] and elements[1]
     if part_index == 2:
         return elements[0] or elements[1] or elements[2]
-    if part_index == 3:
-        return (elements[0] or elements[1]) and (elements[2] or elements[3])
 
 
 def lsfr(broken_times: list, work_time):
-    return (lsfr_part(0, broken_times[:4], work_time)
-            and lsfr_part(1, broken_times[4:6], work_time)
-            and lsfr_part(2, broken_times[6:9], work_time)
-            and lsfr_part(3, broken_times[9:], work_time))
+    return (lsfr_part(0, broken_times[:3], work_time)
+            and lsfr_part(1, broken_times[3:5], work_time)
+            and lsfr_part(2, broken_times[5:], work_time))
 
 
 def run_simulation(n, m, lamb: list, amount_of_devices: list, reserve: list, work_time, logic_function: callable):
@@ -59,24 +55,25 @@ def run_simulation(n, m, lamb: list, amount_of_devices: list, reserve: list, wor
     return 1 - d / N
 
 
-M = 4
-LAMBDAS = [40 * 1e-6, 10 * 1e-6, 80 * 1e-6, 30 * 1e-6]
-N = 35000
-T = 8760
-AMOUNT_OF_DEVICES = [4, 2, 3, 4]
-P = 0.995
-P_START = P + 0.001
-FIND_STEPS = 2
+def brute_force_finding(start, steps):
+    """
+    Find solution via brute forcing
+    :param start: start positions
+    :type: list
+    :param steps: types for brute forcing
+    :type: int
+    :return: none
+    """
+    for i1 in range(start[0], start[0] + steps):
+        for i2 in range(start[1], start[1] + steps):
+            for i3 in range(start[2], start[2] + steps):
+                p = run_simulation(N, M, LAMBDAS, AMOUNT_OF_DEVICES, [i1, i2, i3], T, lsfr)
+                if p >= P:
+                    print(p, (i1, i2, i3))
 
 
 def main():
-    for i1 in range(1, 5):
-        for i2 in range(1, 5):
-            for i3 in range(1, 5):
-                for i4 in range(1, 5):
-                    p = run_simulation(N, M, LAMBDAS, AMOUNT_OF_DEVICES, [i1, i2, i3, i4], T, lsfr)
-                    if p >= P:
-                        print(p, (i1, i2, i3, i4))
+    brute_force_finding([1 for _ in range(M)], 4)
 
 
 def fast_search():
@@ -90,17 +87,12 @@ def fast_search():
                                lambda broken, work_time: lsfr_part(i, broken, work_time))
         reserve.append(res)
     print(reserve, run_simulation(N, M, LAMBDAS, AMOUNT_OF_DEVICES, reserve, T, lsfr))
-    for i1 in range(reserve[0], reserve[0] + FIND_STEPS):
-        for i2 in range(reserve[1], reserve[1] + FIND_STEPS):
-            for i3 in range(reserve[2], reserve[2] + FIND_STEPS):
-                for i4 in range(reserve[3], reserve[3] + FIND_STEPS):
-                    p = run_simulation(N, M, LAMBDAS, AMOUNT_OF_DEVICES, [i1, i2, i3, i4], T, lsfr)
-                    if p >= P:
-                        print(p, (i1, i2, i3, i4))
+    brute_force_finding(reserve, FIND_STEPS)
 
 
 if __name__ == '__main__':
     print("search type 1")
     main()
     print("search type 2")
-    fast_search()
+fast_search()
+
